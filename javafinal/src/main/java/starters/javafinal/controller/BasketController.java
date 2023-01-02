@@ -13,11 +13,13 @@ public class BasketController {
     private final BasketService basketService;
 
     @PostMapping("")
+    @ResponseBody
     public ResponseEntity applyBasket(Long lectureId, Long memberId) {
         return basketService.applyBasket(lectureId, memberId);
     }
 
     @DeleteMapping("")
+    @ResponseBody
     public ResponseEntity cancelBasket(Long lectureId, Long memberId) {
         return basketService.cancelBasket(lectureId, memberId);
     }

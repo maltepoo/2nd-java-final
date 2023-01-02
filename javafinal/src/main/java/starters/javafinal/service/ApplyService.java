@@ -8,11 +8,14 @@ import starters.javafinal.dto.ApplyStatusDto;
 import starters.javafinal.entity.Apply;
 import starters.javafinal.entity.Lecture;
 import starters.javafinal.entity.Member;
+import starters.javafinal.exception.EndDueDateException;
+import starters.javafinal.exception.NoContentException;
 import starters.javafinal.exception.NotAllowedException;
 import starters.javafinal.repository.ApplyRepository;
 import starters.javafinal.repository.LectureRepository;
 import starters.javafinal.repository.MemberRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -27,13 +30,13 @@ public class ApplyService {
 
     @Transactional(readOnly = true)
     public ApplyStatusDto getLectureApplyStatus(Long lectureId, Long memberId) {
-        Member professor = memberRepository.findById(memberId).orElseThrow(() -> new IllegalArgumentException("멤버가 아님"));
+        Member professor = memberRepository.findById(memberId).orElseThrow(() -> new NoContentException("멤버가 아님"));
         if (professor.getRole() == 1) {
             throw new RuntimeException("조회 대상자가 교수가 아님");
         }
-        Lecture lecture = lectureRepository.findById(lectureId).orElseThrow(() -> new IllegalArgumentException("수업이 없음"));
+        Lecture lecture = lectureRepository.findById(lectureId).orElseThrow(() -> new NoContentException("수업이 없음"));
         if (!Objects.equals(lecture.getProfessor(), professor.getName())) {
-            throw new IllegalArgumentException("조회하는 교수의 수업이 아님");
+            throw new NoContentException("조회하는 교수의 수업이 아님");
         }
         Integer applyCount = applyRepository.countAllByLectureId(lectureId);
         return new ApplyStatusDto(applyCount);
@@ -43,13 +46,13 @@ public class ApplyService {
     @Transactional
     public void applyLecture(Long lectureId, Long memberId) {
         // 강의 신청 가능 기간은 2023년 1월 11일 오후 2시부터 오후 6시까지
-//        LocalDateTime now = LocalDateTime.now();
-//        if (now.isBefore(LocalDateTime.of(2023, 1, 11, 14, 0)) || now.isAfter(LocalDateTime.of(2023, 1, 11, 18, 0))) {
-//            throw new EndDueDateException("강의신청기간 아님");
-//        }
+        LocalDateTime now = LocalDateTime.now();
+        if (now.isBefore(LocalDateTime.of(2023, 1, 11, 14, 0)) || now.isAfter(LocalDateTime.of(2023, 1, 11, 18, 0))) {
+            throw new EndDueDateException("강의신청기간 아님");
+        }
 
-        Member member = memberRepository.findById(memberId).orElseThrow(() -> new IllegalArgumentException("멤버가 아님"));
-        Lecture lecture = lectureRepository.findById(lectureId).orElseThrow(() -> new IllegalArgumentException("강의가 없음"));
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new NoContentException("멤버가 아님"));
+        Lecture lecture = lectureRepository.findById(lectureId).orElseThrow(() -> new NoContentException("강의가 없음"));
 
         // 회원이 21학점이 넘지 않았는지
         List<Apply> applies = applyRepository.findAllByMemberId(memberId); // status 0, 1 장바구니, 신청완료인 것들 credit 체크
@@ -108,7 +111,7 @@ public class ApplyService {
 
     @Transactional
     public void cancelLecture(Long lectureId) {
-        Lecture lecture = lectureRepository.findById(lectureId).orElseThrow(() -> new IllegalArgumentException("강의가 없음"));
+        Lecture lecture = lectureRepository.findById(lectureId).orElseThrow(() -> new NoContentException("강의가 없음"));
         lectureRepository.delete(lecture);
     }
 }

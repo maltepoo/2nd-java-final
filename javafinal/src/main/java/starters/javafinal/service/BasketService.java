@@ -11,6 +11,7 @@ import starters.javafinal.entity.Apply;
 import starters.javafinal.entity.Lecture;
 import starters.javafinal.entity.Member;
 import starters.javafinal.exception.EndDueDateException;
+import starters.javafinal.exception.NoContentException;
 import starters.javafinal.exception.NotAllowedException;
 import starters.javafinal.repository.ApplyRepository;
 import starters.javafinal.repository.LectureRepository;
@@ -32,13 +33,13 @@ public class BasketService {
     @Transactional
     public ResponseEntity applyBasket(@RequestParam Long lectureId, @RequestParam Long memberId) {
         // 강의 장바구니 기간은 2023년 1월 9일 오후 2시부터 1월 10일 오후 6시까지
-//        LocalDateTime now = LocalDateTime.now();
-//        if (now.isBefore(LocalDateTime.of(2023, 1, 9, 12, 0)) || now.isAfter(LocalDateTime.of(2023, 1, 9, 18, 0))) {
-//            throw new EndDueDateException("장바구니기간 아님");
-//        }
+        LocalDateTime now = LocalDateTime.now();
+        if (now.isBefore(LocalDateTime.of(2023, 1, 9, 12, 0)) || now.isAfter(LocalDateTime.of(2023, 1, 9, 18, 0))) {
+            throw new EndDueDateException("장바구니기간 아님");
+        }
 
-        Lecture lecture = lectureRepository.findById(lectureId).orElseThrow(() -> new IllegalArgumentException("강의가 없음"));
-        Member member = memberRepository.findById(memberId).orElseThrow(() -> new IllegalArgumentException("멤버가 아님"));
+        Lecture lecture = lectureRepository.findById(lectureId).orElseThrow(() -> new NoContentException("강의가 없음"));
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new NoContentException("멤버가 아님"));
 
         List<Apply> applies = applyRepository.findAllByLectureId(lectureId); // 이미 해당 lecture에 수강신청한 신청서들
         for (Apply apply: applies) {
@@ -80,7 +81,7 @@ public class BasketService {
 
     @Transactional
     public ResponseEntity cancelBasket(Long applyId, Long memberId) {
-        Apply apply = applyRepository.findById(applyId).orElseThrow(() -> new IllegalArgumentException("지원서가 없습니다."));
+        Apply apply = applyRepository.findById(applyId).orElseThrow(() -> new NoContentException("지원서가 없습니다."));
         if (apply.getMember().getId() != memberId) {
             throw new NotAllowedException("내 지원서가 아닌 지원서는 삭제할 수 없습니다.");
         }
