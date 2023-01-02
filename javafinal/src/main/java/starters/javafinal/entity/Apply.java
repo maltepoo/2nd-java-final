@@ -1,5 +1,6 @@
 package starters.javafinal.entity;
 
+import com.sun.istack.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -17,6 +18,7 @@ import java.time.LocalDateTime;
 public class Apply {
     @Id
     @GeneratedValue
+    @NotNull
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
