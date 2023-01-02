@@ -64,7 +64,7 @@ public class BasketService {
         Integer credits = myApplies.stream().map(apply -> apply.getLecture().getCredit()).reduce(0, Integer::sum);
         System.out.println("credits = " + credits);
         if (credits+lecture.getCredit() > 21) {
-            throw new RuntimeException("21학점 이상 수강신청 할 수 없습니다.");
+            throw new NotAllowedException("21학점 이상 수강신청 할 수 없습니다.");
         }
 
         Apply apply;

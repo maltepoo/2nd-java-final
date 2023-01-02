@@ -32,7 +32,7 @@ public class ApplyService {
     public ApplyStatusDto getLectureApplyStatus(Long lectureId, Long memberId) {
         Member professor = memberRepository.findById(memberId).orElseThrow(() -> new NoContentException("멤버가 아님"));
         if (professor.getRole() == 1) {
-            throw new RuntimeException("조회 대상자가 교수가 아님");
+            throw new NotAllowedException("조회 대상자가 교수가 아님");
         }
         Lecture lecture = lectureRepository.findById(lectureId).orElseThrow(() -> new NoContentException("수업이 없음"));
         if (!Objects.equals(lecture.getProfessor(), professor.getName())) {
@@ -58,7 +58,7 @@ public class ApplyService {
         List<Apply> applies = applyRepository.findAllByMemberId(memberId); // status 0, 1 장바구니, 신청완료인 것들 credit 체크
         Integer credits = applies.stream().map(apply -> apply.getLecture().getCredit()).reduce(0, Integer::sum);
         if (credits+lecture.getCredit() > 21) {
-            throw new RuntimeException("21학점 이상 수강신청 할 수 없습니다.");
+            throw new NotAllowedException("21학점 이상 수강신청 할 수 없습니다.");
         }
 
         // 현재 수강하는 강의의 정원이 넘지 않았는지
